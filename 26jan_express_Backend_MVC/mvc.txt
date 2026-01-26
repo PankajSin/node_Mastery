@@ -1,0 +1,14 @@
+ path import: In Node.js, path is a "default" export. You don't use curly braces { } for it.
+ path is a "default" export.
+ There is a change in controller/chat.js
+
+Save all your files (Model and Controller).
+Run your server (node --watch app.js).
+Add a Product: Go to /admin/add-product and submit a title.
+Check your folder: You should see a new file appear: data/products.json.
+Restart the Server: Kill the terminal (Ctrl+C) and start it again.
+Visit the Shop: Go to /.
+If you see your product in the terminal log AFTER restarting the server, you have achieved "Permanent Data Persistence."
+
+Should I Try to update my controllers/admin.js but which function
+In January 2026, you only need to update the function that handles the data incoming from the form.
