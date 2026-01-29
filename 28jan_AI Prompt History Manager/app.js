@@ -11,13 +11,13 @@ const __dirname = path.dirname(__filename);
 server.use(express.static(path.join(__dirname,'public')));
 server.use(express.urlencoded({extended:false}));
 
-server.use('/',(req,res,next)=>{
-     console.log('First Middleware');
-     const {url , method} =req;
-     const current = Date.now();
-     console.log(method,url,current); 
-     next();
-});
+// server.use('/',(req,res,next)=>{
+//      console.log('First Middleware');
+//      const {url , method} =req;
+//      const current = Date.now();
+//      console.log(method,url,current); 
+//      next();
+// });
 
 server.use(ai);
 
