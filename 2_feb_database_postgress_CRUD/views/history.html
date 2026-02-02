@@ -1,0 +1,63 @@
+ 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Prompt History</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>AI Prompt History</h1>
+    <nav>
+        <a href="/">History</a> | <a href="/add-prompt">Add Prompt</a>
+    </nav>
+   <label for="categoryFilter">Filter by Category:</label>
+   <select id="categoryFilter">
+      <option value="all">All</option>
+      <option value="coding">Coding</option>
+      <option value="cooking">Cooking</option>
+      <option value="learn">Learn</option>
+      <option value="write">Writing</option>
+    </select>
+
+    <!-- 1. Keep this container EMPTY. No forms, no buttons here! -->
+    <div id="prompt-container">
+        <p>Loading your history...</p>
+    </div>
+
+    <script>
+    const container = document.getElementById('prompt-container');
+const filter = document.getElementById('categoryFilter');
+
+// Function to fetch and render
+function loadPrompts(category = 'all') {
+    fetch(`/api/prompts?category=${category}`)
+        .then(res => res.json())
+        .then(data => {
+            container.innerHTML = '';
+            if (data.length === 0) {
+                container.innerHTML = '<p>No prompts found for this category.</p>';
+                return;
+            }
+            let html = '<ul>';
+            data.forEach(p => {
+                html += `<li>${p.category}: ${p.text} 
+                    <form action="/delete-prompt" method="POST" style="display:inline">
+                        <input type="hidden" name="promptId" value="${p.id}">
+                        <button type="submit">Delete</button>
+                    </form></li>`;
+            });
+            container.innerHTML = html + '</ul>';
+        });
+}
+
+// Listen for changes
+filter.addEventListener('change', (e) => {
+    loadPrompts(e.target.value);
+});
+
+// Initial load
+loadPrompts();
+
+    </script>
+</body>
+</html>
