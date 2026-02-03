@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Prompt History</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- CSS for the "Atom One Dark" theme -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+<!-- The Highlight.js Library -->
+<script src="https://cdnjs.cloudflare.com"></script>
+
+    <!-- 1. Load Marked.js library (The UMD version is most stable for browsers) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <style>
+        /* Basic styling to make AI responses look good */
+        .ai-box {
+            background: #f4f7f6;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .ai-box pre {
+            background: #2d2d2d;
+            color: #ccc;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 5px;
+        }
+        li { margin-bottom: 30px; list-style: none; border-bottom: 1px solid #ddd; padding-bottom: 15px; }
+        .badge { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <h1>AI Prompt History Manager</h1>
+    
+    <nav>
+        <a href="/">History</a> | <a href="/add-prompt">Add New Prompt</a>
+    </nav>
+
+    <div style="margin: 20px 0;">
+        <label for="categoryFilter">Filter by Category:</label>
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="coding">Coding</option>
+            <option value="cooking">Cooking</option>
+            <option value="learn">Learn</option>
+            <option value="write">Writing</option>
+        </select>
+    </div>
+
+    <!-- The container that JavaScript will fill -->
+    <div id="prompt-container">
+        <p>Loading your AI history...</p>
+    </div>
+
+    <script>
+        const container = document.getElementById('prompt-container');
+        const filter = document.getElementById('categoryFilter');
+
+        // Function to fetch and render the data
+        function loadPrompts(category = 'all') {
+            fetch(`/api/prompts?category=${category}`)
+                .then(res => res.json())
+                .then(data => {
+                    container.innerHTML = ''; // Clear loading message
+
+                    if (data.length === 0) {
+                        container.innerHTML = '<p>No prompts found in this category.</p>';
+                        return;
+                    }
+
+                    let html = '<ul>';
+                    data.forEach(p => {
+                        // 2. USE MARKED TO PARSE THE AI RESPONSE
+                        // Note: marked.parse() is the standard for the latest version
+                        const formattedAI = marked.parse(p.response || "No AI response saved.");
+
+                        html += `
+                        <li>
+                            <div>
+                                <span class="badge">${p.category.toUpperCase()}</span>
+                                <p><strong>Prompt:</strong> ${p.text}</p>
+                            </div>
+                            
+                            <div class="ai-box">
+                                <strong>AI Response:</strong>
+                                <div>${formattedAI}</div>
+                            </div>
+
+                            <form action="/delete-prompt" method="POST">
+                                <input type="hidden" name="promptId" value="${p.id}">
+                                <button type="submit" style="color: red; cursor: pointer;">Delete Entry</button>
+                            </form>
+                        </li>`;
+                    });
+                    html += '</ul>';
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error("Fetch Error:", err);
+                    container.innerHTML = '<p style="color:red;">Error loading history. Check terminal.</p>';
+                });
+        }
+
+        // Listen for filter changes
+        filter.addEventListener('change', (e) => {
+            loadPrompts(e.target.value);
+        });
+
+        // 3. INITIAL LOAD (Wait for page to be ready)
+        window.onload = () => {
+            loadPrompts();
+        };
+    </script>
+</body>
+</html>
