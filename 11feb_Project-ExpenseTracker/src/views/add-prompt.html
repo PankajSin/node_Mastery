@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Expense</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Add New Expense</h1>
+    <nav>
+        <a href="/">History</a> | <a href="/add-prompt">Add New</a>
+    </nav>
+
+    <div class="form-container">
+        <p>Type what you spent and let AI categorize it!</p>
+        <form action="/add-prompt" method="POST" id="expenseForm">
+            <div class="control">
+                <label for="userInput">What did you buy?</label>
+                <input type="text" name="userInput" id="userInput"
+                       placeholder="e.g. Spent 500 on Pizza" required>
+            </div>
+            <button type="submit" id="submitBtn">Save Expense</button>
+        </form>
+    </div>
+
+    <script>
+        // UX: Show a loading state while AI thinks
+        const form = document.getElementById('expenseForm');
+        const btn = document.getElementById('submitBtn');
+        form.onsubmit = () => {
+            btn.disabled = true;
+            btn.innerText = "AI is categorizing...";
+        };
+    </script>
+</body>
+</html>

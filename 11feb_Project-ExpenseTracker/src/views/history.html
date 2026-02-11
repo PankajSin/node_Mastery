@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Prompt History</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- CSS for the "Atom One Dark" theme -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+<!-- The Highlight.js Library -->
+<script src="https://cdnjs.cloudflare.com"></script>
+
+    <!-- 1. Load Marked.js library (The UMD version is most stable for browsers) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <style>
+        /* Basic styling to make AI responses look good */
+        .ai-box {
+            background: #f4f7f6;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .ai-box pre {
+            background: #2d2d2d;
+            color: #ccc;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 5px;
+        }
+        li { margin-bottom: 30px; list-style: none; border-bottom: 1px solid #ddd; padding-bottom: 15px; }
+        .badge { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <h1>AI Prompt History Manager</h1>
+    
+    <nav>
+        <a href="/">History</a> | <a href="/add-prompt">Add New Prompt</a>
+    </nav>
+    <h2 id="total-display" style="background: #e1f5fe; padding: 15px; border-radius: 8px;">
+        Total Spending: ₹0.00
+    </h2>
+    
+
+    <div style="margin: 20px 0;">
+        <label for="categoryFilter">Filter by Category:</label>
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="coding">Coding</option>
+            <option value="cooking">Cooking</option>
+            <option value="learn">Learn</option>
+            <option value="write">Writing</option>
+        </select>
+    </div>
+
+    <!-- The container that JavaScript will fill -->
+    <div id="prompt-container">
+        <p>Loading your AI history...</p>
+    </div>
+
+    <script>
+        const container = document.getElementById('prompt-container');
+        const filter = document.getElementById('categoryFilter');
+
+        // Function to fetch and render the data
+        function loadPrompts(category = 'all') {
+            fetch(`/api/prompts?category=${category}`)     
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Data received from server:", data);
+    // 1. Update Total Display (Accessing the .total property)
+    const totalDisplay = document.getElementById('total-display');
+    if (totalDisplay) {
+        totalDisplay.innerText = `Total Spending: ₹${data.total || 0}`;
+    }
+
+    const container = document.getElementById('prompt-container');
+    container.innerHTML = ''; 
+
+    // 2. Use data.expenses instead of just data
+    const expensesList = data.expenses || []; 
+
+    if (!expensesList || expensesList.length === 0) {
+        container.innerHTML = '<p>No expenses found in this category.</p>';
+        return;
+    }
+
+    let html = '<ul>';
+    // 3. Loop through the list inside the object
+    expensesList.forEach(p => {
+        // Use marked for the description if you want, or just display raw text
+        const description = p.description || "No description";
+
+        html += `
+        <li>
+            <strong>${p.category}:</strong> ${p.description} 
+            <span style="color: green; font-weight: bold;"> - ₹${p.amount}</span>
+            <form action="/delete-expense" method="POST" style="display:inline">
+                <!-- IMPORTANT: Make sure the value matches the ID from Sequelize -->
+                <input type="hidden" name="expenseId" value="${p.id}">
+                <button type="submit">Delete</button>
+            </form>
+        </li>`;
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+})
+
+                .catch(err => {
+                    console.error("Fetch Error:", err);
+                    document.getElementById('prompt-container').innerHTML = "Error loading data.";
+                    container.innerHTML = '<p style="color:red;">Error loading history. Check terminal.</p>';
+                });
+        }
+
+        // Listen for filter changes
+        filter.addEventListener('change', (e) => {
+            loadPrompts(e.target.value);
+        });
+
+        // 3. INITIAL LOAD (Wait for page to be ready)
+        window.onload = () => {
+            loadPrompts();
+        };
+    </script>
+</body>
+</html>
